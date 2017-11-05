@@ -1,16 +1,15 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-import logging
+import MySQLdb
 
-def foo(s):
-    return 10 / int(s)
+conn = MySQLdb.connect(host='localhost', user='root', passwd='123456', db='test', port=3306)
+cur = conn.cursor()
+cur.execute('select * from testtable')
+for row in cur.fetchall():
+    print row
+cur.close()
+conn.close()
 
-def bar(s):
-    return foo(s) * 2
 
-def main():
-    bar('0')
 
-main()
-print 'end'
