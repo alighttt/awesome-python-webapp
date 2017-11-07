@@ -13,7 +13,7 @@ class _Engine(object):
 engine = None
 
 
-def create_engine(user='root', passwd='123456', db='test', host='localhost', port=3306):
+def create_engine(user='root', passwd='123456', db='awesome', host='localhost', port=3306):
     connectfunc = lambda :MySQLdb.connect(user=user, passwd=passwd, db=db, host=host, port=port)
     global engine
     engine = _Engine(connectfunc)

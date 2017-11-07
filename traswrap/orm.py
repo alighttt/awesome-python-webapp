@@ -1,23 +1,34 @@
+import db
 
 class Field(object):
-    def __init__(self, name, column_type):
-        self.name = name
+    def __init__(self, column_type):
         self.column_type = column_type
     def __str__(self):
-        return '<%s:%s>' % (self.__class__.__name__, self.name)
+        return '<%s>' % (self.__class__.__name__)
 
 class StringField(Field):
-    def __init__(self, name):
-        super(StringField, self).__init__(name, 'varchar(100)')
+    def __init__(self):
+        super(StringField, self).__init__('varchar(100)')
+        
+class TextField(Field):
+    def __init__(self):
+        super(TextField, self).__init__('text')
 
+class BooleanField(Field):
+    def __init__(self):
+        super(BooleanField, self).__init__('tinyint(1)')
+        
 class IntegerField(Field):
-    def __init__(self, name):
-        super(IntegerField, self).__init__(name, 'bigint')
+    def __init__(self):
+        super(IntegerField, self).__init__('bigint')
 
+class FloatField(Field):
+    def __init__(self):
+        super(FloatField, self).__init__('numeric(15,3)')
+        
 class ModelMetaclass(type):
-
     def __new__(cls, name, bases, attrs):
-        if name=='Model':
+        if name == 'Model':
             return type.__new__(cls, name, bases, attrs)
         mappings = dict()
         for k, v in attrs.iteritems():
@@ -25,43 +36,57 @@ class ModelMetaclass(type):
                 mappings[k] = v
         for k in mappings.iterkeys():
             attrs.pop(k)
-        attrs['__mappings__'] = mappings # 保存属性和列的映射关系
-        attrs['__table__'] = name # 假设表名和类名一致
+        attrs['__mappings__'] = mappings
         return type.__new__(cls, name, bases, attrs)
 
 class Model(dict):
     __metaclass__ = ModelMetaclass
-
-    def __init__(self, **kw):
-        super(Model, self).__init__(**kw)
-
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r"'Model' object has no attribute '%s'" % key)
-
-    def __setattr__(self, key, value):
-        self[key] = value
-
-    def save(self):
+    def insert(self):
         fields = []
         args = []
         for k, v in self.__mappings__.iteritems():
-            fields.append(v.name)
-            args.append(str(self.get(k)))
+            fields.append(k)
+            args.append('"' + str(self.get(k)) + '"')
         sql = 'insert into %s (%s) values (%s)' % (self.__table__, ','.join(fields), ','.join(args))
-        print('SQL: %s' % sql)
+        return db.update(sql)
+    def select(self, *key):
+        args = []
+        for k, v in self.__mappings__.iteritems():
+            if not self.get(k) is None :
+                args.append(str(k) + '="' + str(self.get(k)) + '"')
+        sql = 'select %s from %s where %s' % (','.join(key), self.__table__, ' and '.join(args))
+        d = db.select(sql)
+        return d if d else None
 
-# testing code:
-
+    
 class User(Model):
-    id = IntegerField('uid')
-    name = StringField('username')
-    email = StringField('email')
-    password = StringField('password')
+    __table__ = 'users'
+    id = StringField()
+    email = StringField()
+    password = StringField()
+    admin = BooleanField()
+    name = StringField()
+    image = StringField()
+    created_at = FloatField()
 
  
-u = User(id=12345, name='Michael', email='test@orm.org', password='my-pwd')
-u.save()
-
+class Blog(Model):
+    __table__ = 'blogs'
+    id = StringField()
+    user_id = StringField()
+    user_name = StringField()
+    user_image = StringField()
+    name = StringField()
+    summary = StringField()
+    content = TextField()
+    created_at = FloatField()
+ 
+class Comment(Model):
+    __table__ = 'comments'
+    id = StringField()
+    blog_id = StringField()
+    user_id = StringField()
+    user_name = StringField()
+    user_image = StringField()
+    content = TextField()
+    created_at = FloatField()

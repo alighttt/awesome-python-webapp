@@ -1,15 +1,8 @@
-import db
+import db, orm
 
 db.create_engine()
-
-print db.update("insert into testtable (name, sex, birthday) values ('xiaoguang', 'm', '2017-01-20')")
-
-for row in db.select("select * from testtable"):
-    print row
-
-# cur = db.engine.connect().cursor()
-# cur.execute('select * from testtable')
-# for row in cur.fetchall():
-#     print row
-# cur.close()
-# print "aa"
+# u = User(id=1, email='2246707520@qq.com', password='1246707520', admin=1, name='alight', image='imagecontent', created_at=1991.0201)
+u = orm.User(id=1, email='1246707520@qq.com')
+# print u.insert()
+print u.select('id', 'name')
+# print u.select('*')
