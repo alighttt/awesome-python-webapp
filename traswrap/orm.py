@@ -57,7 +57,14 @@ class Model(dict):
         sql = 'select %s from %s where %s' % (','.join(key), self.__table__, ' and '.join(args))
         d = db.select(sql)
         return d if d else None
-
+    def delete(self):
+        args = []
+        for k, v in self.__mappings__.iteritems():
+            if not self.get(k) is None :
+                args.append(str(k) + '="' + str(self.get(k)) + '"')
+        sql = 'delete from %s where %s' % (self.__table__, ' and '.join(args))
+        print sql
+        return db.update(sql)
     
 class User(Model):
     __table__ = 'users'
@@ -68,7 +75,6 @@ class User(Model):
     name = StringField()
     image = StringField()
     created_at = FloatField()
-
  
 class Blog(Model):
     __table__ = 'blogs'

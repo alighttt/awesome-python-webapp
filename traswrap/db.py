@@ -71,10 +71,7 @@ def select(sql, *args):
     global _db_ctx
     cur = _db_ctx.cursor()
     cur.execute(sql)
-    rs = []
-    for row in cur.fetchall():
-        rs.append(row)
-    return rs
+    return cur.fetchall()
 
 @with_connection
 def update(sql, *args):
